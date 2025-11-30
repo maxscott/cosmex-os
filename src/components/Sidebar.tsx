@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { X, ChevronDown, ChevronRight } from "lucide-react";
+import { X, ChevronRight } from "lucide-react";
 
 export interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
@@ -93,12 +93,11 @@ export const Sidebar = ({ isOpen, onClose, navItems }: SidebarProps) => {
           <span>{item.label}</span>
         </div>
         {hasChildren && (
-          <div className="shrink-0">
-            {isOpen ? (
-              <ChevronDown className="w-4 h-4" />
-            ) : (
-              <ChevronRight className="w-4 h-4" />
-            )}
+          <div className="shrink-0 transition-transform duration-300 ease-in-out">
+            <ChevronRight
+              className={`w-4 h-4 transition-transform duration-300 ease-in-out ${isOpen ? "rotate-90" : "rotate-0"
+                }`}
+            />
           </div>
         )}
       </>
@@ -130,9 +129,14 @@ export const Sidebar = ({ isOpen, onClose, navItems }: SidebarProps) => {
             {content}
           </Link>
         )}
-        {hasChildren && isOpen && (
-          <div className="ml-4">
-            {item.children!.map((child) => renderNavItem(child, level + 1))}
+        {hasChildren && (
+          <div
+            className={`ml-4 overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+              }`}
+          >
+            <div className="py-1">
+              {item.children!.map((child) => renderNavItem(child, level + 1))}
+            </div>
           </div>
         )}
       </div>
