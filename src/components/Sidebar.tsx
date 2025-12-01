@@ -17,9 +17,10 @@ interface SidebarProps {
 
 export const Sidebar = ({ isOpen, onClose, navItems }: SidebarProps) => {
   const location = useLocation();
+  const [manuallyOpenItems, setManuallyOpenItems] = useState<Set<string>>(new Set());
 
-  // Derive which parent should be open based on current route
-  const routeBasedOpen = useMemo(() => {
+  // Auto-open parent if current route matches a child
+  const autoOpenParent = useMemo(() => {
     const pathSegments = location.pathname.split("/").filter(Boolean);
     if (pathSegments.length > 1) {
       return `/${pathSegments[0]}`;
@@ -27,42 +28,25 @@ export const Sidebar = ({ isOpen, onClose, navItems }: SidebarProps) => {
     return null;
   }, [location.pathname]);
 
-  // Track manually toggled items (user clicks) and the route section when it was toggled
-  const [manuallyToggled, setManuallyToggled] = useState<string | null>(null);
-  const [manuallyToggledRoute, setManuallyToggledRoute] = useState<string | null>(null);
-
-  // Compute effective open items: manual toggle takes precedence if still in same route section
+  // Combine auto-opened parent with manually toggled items
   const openItems = useMemo(() => {
-    // If there's a manual toggle and we're still in the same route section, use it
-    // This allows clicking to expand different nav sections without changing routes
-    if (manuallyToggled !== null && manuallyToggledRoute === routeBasedOpen) {
-      return new Set([manuallyToggled]);
+    const combined = new Set(manuallyOpenItems);
+    if (autoOpenParent) {
+      combined.add(autoOpenParent);
     }
-    // If route changed to a different section, clear manual toggle state
-    if (manuallyToggledRoute !== routeBasedOpen && manuallyToggled !== null) {
-      // Clear the manual toggle when route changes (but don't call setState here)
-      // We'll handle this by checking the condition above
-    }
-    // Use route-based if available
-    if (routeBasedOpen) {
-      return new Set([routeBasedOpen]);
-    }
-    return new Set();
-  }, [manuallyToggled, manuallyToggledRoute, routeBasedOpen]);
+    return combined;
+  }, [manuallyOpenItems, autoOpenParent]);
 
   const toggleItem = (itemPath: string, e: React.MouseEvent) => {
     e.preventDefault();
-    const currentRouteSection = routeBasedOpen;
-
-    setManuallyToggled((prev) => {
-      // If clicking the same item that's already open, close it
-      if (prev === itemPath) {
-        setManuallyToggledRoute(null);
-        return null;
+    setManuallyOpenItems((prev) => {
+      const next = new Set(prev);
+      if (next.has(itemPath)) {
+        next.delete(itemPath);
+      } else {
+        next.add(itemPath);
       }
-      // Otherwise, open this item (accordion behavior - only one open at a time)
-      setManuallyToggledRoute(currentRouteSection);
-      return itemPath;
+      return next;
     });
   };
 
@@ -131,7 +115,7 @@ export const Sidebar = ({ isOpen, onClose, navItems }: SidebarProps) => {
         )}
         {hasChildren && (
           <div
-            className={`ml-4 overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+            className={`ml-4 overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-96" : "max-h-0"
               }`}
           >
             <div className="py-1">
