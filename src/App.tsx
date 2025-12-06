@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Sidebar, type NavItem } from "./components/Sidebar";
 import { Header } from "./components/Header";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import { HomePage } from "./pages/HomePage";
 import { ProductsPage } from "./pages/ProductsPage";
 import { ProductDetailPage } from "./pages/ProductDetailPage";
@@ -39,6 +40,7 @@ import { ReceivablesPage } from "./pages/ReceivablesPage";
 import { QAPage } from "./pages/QAPage";
 import { AuthCallbackPage } from "./pages/AuthCallbackPage";
 import { AuthProvider } from "./contexts/AuthProvider";
+import { LoginPage } from "./pages/LoginPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -114,35 +116,40 @@ const App = () => {
               {/* Content Area */}
               <main className="flex-1 overflow-auto p-4 lg:p-6">
                 <Routes>
+                  {/* Public Routes */}
                   <Route path="/auth/callback" element={<AuthCallbackPage />} />
                   <Route path="/auth/login" element={<LoginPage />} />
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/home" element={<Navigate to="/" replace />} />
 
-                  {/* Products Routes */}
-                  <Route path="/products/proposals" element={<ProposalsPage />} />
-                  <Route path="/products/changes" element={<ChangesPage />} />
-                  <Route path="/products/purchase-orders" element={<PurchaseOrdersPage />} />
-                  <Route path="/products/:id" element={<ProductDetailPage />} />
-                  <Route path="/products" element={<ProductsPage />} />
+                  {/* Protected Routes */}
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/home" element={<Navigate to="/" replace />} />
 
-                  {/* CRM Routes */}
-                  <Route path="/crm/leads/:id" element={<LeadDetailPage />} />
-                  <Route path="/crm/leads" element={<LeadsPage />} />
-                  <Route path="/crm/brands/:id" element={<BrandDetailPage />} />
-                  <Route path="/crm/brands" element={<BrandsPage />} />
-                  <Route path="/crm/forms" element={<CrmFormsPage />} />
+                    {/* Products Routes */}
+                    <Route path="/products/proposals" element={<ProposalsPage />} />
+                    <Route path="/products/changes" element={<ChangesPage />} />
+                    <Route path="/products/purchase-orders" element={<PurchaseOrdersPage />} />
+                    <Route path="/products/:id" element={<ProductDetailPage />} />
+                    <Route path="/products" element={<ProductsPage />} />
 
-                  {/* Messaging Routes */}
-                  <Route path="/messaging/inbox/:id" element={<ThreadDetailPage />} />
-                  <Route path="/messaging/inbox" element={<InboxPage />} />
-                  <Route path="/messaging/response-templates" element={<ResponseTemplatesPage />} />
+                    {/* CRM Routes */}
+                    <Route path="/crm/leads/:id" element={<LeadDetailPage />} />
+                    <Route path="/crm/leads" element={<LeadsPage />} />
+                    <Route path="/crm/brands/:id" element={<BrandDetailPage />} />
+                    <Route path="/crm/brands" element={<BrandsPage />} />
+                    <Route path="/crm/forms" element={<CrmFormsPage />} />
 
-                  {/* Documents Routes */}
-                  <Route path="/documents/contracts" element={<ContractsPage />} />
-                  <Route path="/documents/invoices" element={<InvoicesPage />} />
-                  <Route path="/documents/receivables" element={<ReceivablesPage />} />
-                  <Route path="/documents/qa" element={<QAPage />} />
+                    {/* Messaging Routes */}
+                    <Route path="/messaging/inbox/:id" element={<ThreadDetailPage />} />
+                    <Route path="/messaging/inbox" element={<InboxPage />} />
+                    <Route path="/messaging/response-templates" element={<ResponseTemplatesPage />} />
+
+                    {/* Documents Routes */}
+                    <Route path="/documents/contracts" element={<ContractsPage />} />
+                    <Route path="/documents/invoices" element={<InvoicesPage />} />
+                    <Route path="/documents/receivables" element={<ReceivablesPage />} />
+                    <Route path="/documents/qa" element={<QAPage />} />
+                  </Route>
                 </Routes>
               </main>
             </div>

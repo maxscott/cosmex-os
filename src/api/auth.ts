@@ -1,6 +1,5 @@
-import { post, type ApiError } from "@/api/post";
-
-const ERROR_MESSAGE = "Invalid response: missing access token on refresh";
+import { type ApiError } from "@/api/methods";
+import * as api from "@/api/methods";
 
 // a guard function to ensure the response is a valid token response
 const guardTokenResponse = (data: unknown): data is { accessToken: string } => {
@@ -16,22 +15,34 @@ const guardTokenResponse = (data: unknown): data is { accessToken: string } => {
 };
 
 export const getAccessToken = async (code: string): Promise<string> => {
-  const data = await post({ endpoint: "/auth/exchange", body: { code } });
+  const data = await api.post({ endpoint: "/auth/exchange", body: { code } });
 
   if (!guardTokenResponse(data)) {
-    throw { message: ERROR_MESSAGE } as ApiError;
+    console.warn(data);
+    throw { message: "Invalid response: missing access token on exchange" } as ApiError;
   }
 
   return data.accessToken;
 };
 
 export const refreshTokens = async (): Promise<string> => {
-  const data = await post({ endpoint: "/auth/refresh" });
+  const data = await api.post({ endpoint: "/auth/refresh" });
 
   if (!guardTokenResponse(data)) {
-    throw { message: ERROR_MESSAGE } as ApiError;
+    console.warn(data);
+    throw { message: "Invalid response: missing access token on refresh" } as ApiError;
   }
 
   return data.accessToken;
+};
+
+export const getAuthenticationUrl = async (): Promise<string> => {
+  const data = await api.get({ endpoint: "/auth/url" });
+
+  if (!data || typeof data !== "object" || !("url" in data) || typeof data.url !== "string") {
+    throw { message: "Invalid response: missing workos url" } as ApiError;
+  }
+
+  return data.url;
 };
 
