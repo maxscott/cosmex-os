@@ -4,7 +4,9 @@ export interface AuthContextType {
   accessToken: string | null;
   setAccessToken: (accessToken: string) => void;
   logout: () => void;
-  isAuthenticated: boolean;
+  isLoading: boolean;
+  user: unknown;
+  error: unknown;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);

@@ -51,12 +51,12 @@ export const AuthCallbackPage = () => {
         <div className="text-center">
           <div className="text-red-600 text-xl mb-4">Authentication Failed</div>
           <p className="text-gray-600 mb-4">{errorMessage}</p>
-          <button
-            onClick={() => navigate("/")}
-            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800"
+          <a
+            href="/auth/login"
+            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 inline-block"
           >
-            Return to Home
-          </button>
+            Return to Login
+          </a>
         </div>
       </div>
     );

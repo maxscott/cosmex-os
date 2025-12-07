@@ -46,3 +46,8 @@ export const getAuthenticationUrl = async (): Promise<string> => {
   return data.url;
 };
 
+export const getMe = async (token: string): Promise<unknown> => {
+  const data = await api.get({ endpoint: "/auth/me", token });
+  return data;
+};
+
