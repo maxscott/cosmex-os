@@ -1,5 +1,6 @@
 import { type ApiError } from "@/api/methods";
 import * as api from "@/api/methods";
+import type { UserData } from "@/types/user";
 
 // a guard function to ensure the response is a valid token response
 const guardTokenResponse = (data: unknown): data is { accessToken: string } => {
@@ -46,8 +47,19 @@ export const getAuthenticationUrl = async (): Promise<string> => {
   return data.url;
 };
 
-export const getMe = async (token: string): Promise<unknown> => {
+export const getMe = async (token: string): Promise<UserData> => {
   const data = await api.get({ endpoint: "/auth/me", token });
-  return data;
+
+  if (!data || typeof data !== "object" ||
+    !("id" in data) || typeof data.id !== "string" ||
+    !("email" in data) || typeof data.email !== "string" ||
+    !("emailVerified" in data) || typeof data.emailVerified !== "boolean" ||
+    !("firstName" in data) || typeof data.firstName !== "string" ||
+    !("lastName" in data) || typeof data.lastName !== "string" ||
+    !("profilePictureUrl" in data) || typeof data.profilePictureUrl !== "string") {
+    throw new Error("Invalid response: missing user data");
+  }
+
+  return data as UserData;
 };
 

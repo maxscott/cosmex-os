@@ -41,6 +41,7 @@ import { QAPage } from "./pages/QAPage";
 import { AuthCallbackPage } from "./pages/AuthCallbackPage";
 import { AuthProvider } from "./contexts/AuthProvider";
 import { LoginPage } from "./pages/LoginPage";
+import { ProfilePage } from "./pages/ProfilePage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -149,6 +150,9 @@ const App = () => {
                     <Route path="/documents/invoices" element={<InvoicesPage />} />
                     <Route path="/documents/receivables" element={<ReceivablesPage />} />
                     <Route path="/documents/qa" element={<QAPage />} />
+
+                    {/* Profile Route */}
+                    <Route path="/profile" element={<ProfilePage />} />
                   </Route>
                 </Routes>
               </main>

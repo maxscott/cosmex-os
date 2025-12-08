@@ -1,3 +1,4 @@
+import type { UserData } from "@/types/user";
 import { createContext } from "react";
 
 export interface AuthContextType {
@@ -5,7 +6,7 @@ export interface AuthContextType {
   setAccessToken: (accessToken: string) => void;
   logout: () => void;
   isLoading: boolean;
-  user: unknown;
+  user: UserData | null;
   error: unknown;
 }
 

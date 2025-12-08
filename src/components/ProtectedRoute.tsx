@@ -11,10 +11,10 @@ export const ProtectedRoute = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
         </div>
-        <div className="border-2 border-red-500 text-gray-600">
-          <p>error: {JSON.stringify(error)}</p>
-          <p>user: {JSON.stringify(user)}</p>
-          <p>isLoading: {JSON.stringify(isLoading)}</p>
+        <div className="text-center">
+          <p className="text-gray-600">error: {JSON.stringify(error)}</p>
+          <p className="text-gray-600">user: {JSON.stringify(user)}</p>
+          <p className="text-gray-600">isLoading: {JSON.stringify(isLoading)}</p>
         </div>
       </div>
     );

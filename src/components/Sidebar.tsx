@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { X, ChevronRight } from "lucide-react";
+import { X, ChevronRight, User, Users } from "lucide-react";
 
 export interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
@@ -131,7 +131,7 @@ export const Sidebar = ({ isOpen, onClose, navItems }: SidebarProps) => {
     <>
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out lg:relative lg:translate-x-0 overflow-y-auto ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out lg:relative lg:translate-x-0 flex flex-col ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
           <div className="flex items-center gap-2">
@@ -143,8 +143,35 @@ export const Sidebar = ({ isOpen, onClose, navItems }: SidebarProps) => {
           </button>
         </div>
 
-        <nav className="p-4">
-          {navItems.map((item) => renderNavItem(item))}
+        <nav className="flex-1 flex flex-col overflow-hidden p-4">
+          <div className="flex-1 overflow-y-auto min-h-0">
+            {navItems.map((item) => renderNavItem(item))}
+          </div>
+
+          {/* Profile Link at Bottom */}
+          <div className="mt-auto pt-4 border-t border-gray-200 shrink-0">
+            <Link to="/team"
+              onClick={onClose}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${location.pathname === "/test"
+                ? "bg-gray-100 text-gray-900"
+                : "text-gray-600 hover:bg-gray-50"
+                }`}
+            >
+              <Users className="w-5 h-5 shrink-0" />
+              <span>Team</span>
+            </Link>
+            <Link
+              to="/profile"
+              onClick={onClose}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${location.pathname === "/profile"
+                ? "bg-gray-100 text-gray-900"
+                : "text-gray-600 hover:bg-gray-50"
+                }`}
+            >
+              <User className="w-5 h-5 shrink-0" />
+              <span>Profile</span>
+            </Link>
+          </div>
         </nav>
       </div>
 

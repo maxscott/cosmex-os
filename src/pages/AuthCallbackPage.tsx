@@ -7,27 +7,26 @@ import { useAuth } from "@/contexts/useAuth";
 export const AuthCallbackPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { setAccessToken } = useAuth();
+  const { setAccessToken, user, error: authError } = useAuth();
   const code = searchParams.get("code");
 
-  const { isPending, isError, error, mutate } = useMutation({
+  const { isPending, isError, error: exchangeError, mutate } = useMutation({
     mutationFn: () => {
       if (!code) {
         throw new Error("No authorization code provided");
       }
+      // remove the code from the URL
+      searchParams.delete("code");
+      window.history.replaceState({}, "", window.location.pathname);
       return getAccessToken(code);
     },
     onSuccess: (accessToken: string) => {
       setAccessToken(accessToken);
-
-      // Redirect to home after a brief delay
-      setTimeout(() => {
-        navigate("/");
-      }, 3000);
-    },
+    }
   });
 
   useEffect(() => { if (code) mutate(); }, [code, mutate]);
+  useEffect(() => { if (user) navigate("/"); }, [user, navigate]);
 
   if (isPending) {
     return (
@@ -40,17 +39,11 @@ export const AuthCallbackPage = () => {
     );
   }
 
-  if (isError) {
-    const errorMessage =
-      error && typeof error === "object" && "message" in error
-        ? (error as { message: string }).message
-        : "An error occurred during authentication";
-
+  if (isError || authError) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="text-red-600 text-xl mb-4">Authentication Failed</div>
-          <p className="text-gray-600 mb-4">{errorMessage}</p>
           <a
             href="/auth/login"
             className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 inline-block"

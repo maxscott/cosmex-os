@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getMe, refreshTokens } from "@/api/auth";
+import { sleep } from "@/lib/utils";
+import type { UserData } from "@/types/user";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -9,7 +11,7 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [user, setUser] = useState<unknown>(null);
+  const [user, setUser] = useState<UserData | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [isLoading, setIsLoading] = useState(true);
   const isFetchingRef = useRef(false);
@@ -19,10 +21,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return; // Already fetching, skip
     }
     isFetchingRef.current = true;
-    const userData = await getMe(accessToken);
-    setUser(userData);
-    setIsLoading(false);
-    isFetchingRef.current = false;
+    try {
+      const userData = await getMe(accessToken);
+      setUser(userData);
+      setIsLoading(false);
+    } catch (error) {
+      handleError(error);
+    } finally {
+      isFetchingRef.current = false;
+    }
   }
 
   const refreshTokensHandler = async () => {
@@ -62,11 +69,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           return;
         }
       } catch (error1) {
+        handleError(error1);
         try {
           if (triedRefresh) {
             handleError(error1);
             return;
           } else {
+            if (isFetchingRef.current) {
+              return;
+            }
             await refreshTokensHandler();
             // accessToken will be set, which will trigger this effect again to call getCurrentUserHandler
             return;
@@ -80,7 +91,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     initializeAuth();
   }, [accessToken, user]);
 
-  const logout = () => {
+  const logout = async () => {
+    await sleep(1000);
     setAccessToken(null);
     setUser(null);
     setError(null);

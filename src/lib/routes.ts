@@ -22,6 +22,7 @@ export const routeToBreadcrumb: Record<string, string> = {
   "/documents/invoices": "Invoices",
   "/documents/receivables": "Receivables",
   "/documents/qa": "QA",
+  "/profile": "Profile",
 };
 
 // Convert route path to breadcrumb array
@@ -37,12 +38,12 @@ export const getBreadcrumbsFromPath = (pathname: string): Array<{ label: string;
   for (let i = 0; i < segments.length; i++) {
     const segment = segments[i];
     currentPath += `/${segment}`;
-    
+
     // Check if segment looks like an ID (UUID, numeric, or long alphanumeric)
     const isId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment) ||
-                 /^\d+$/.test(segment) ||
-                 (segment.length > 10 && /^[a-z0-9-]+$/i.test(segment));
-    
+      /^\d+$/.test(segment) ||
+      (segment.length > 10 && /^[a-z0-9-]+$/i.test(segment));
+
     if (isId) {
       // For dynamic routes (IDs), use the parent path pattern
       const parentPath = i > 0 ? `/${segments[i - 1]}` : "";
@@ -51,10 +52,10 @@ export const getBreadcrumbsFromPath = (pathname: string): Array<{ label: string;
       breadcrumbs.push({ label, path: currentPath });
     } else {
       // Format label: capitalize and replace hyphens with spaces
-      const label = routeToBreadcrumb[currentPath] || 
-                   segment.split("-").map(word => 
-                     word.charAt(0).toUpperCase() + word.slice(1)
-                   ).join(" ");
+      const label = routeToBreadcrumb[currentPath] ||
+        segment.split("-").map(word =>
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(" ");
       breadcrumbs.push({ label, path: currentPath });
     }
   }
