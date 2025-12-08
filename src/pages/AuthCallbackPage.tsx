@@ -7,10 +7,10 @@ import { useAuth } from "@/contexts/useAuth";
 export const AuthCallbackPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { setAccessToken, user, error: authError } = useAuth();
+  const { setAccessToken, user, error: authError, isLoading: isAuthLoading } = useAuth();
   const code = searchParams.get("code");
 
-  const { isPending, isError, error: exchangeError, mutate } = useMutation({
+  const { isPending, isError, mutate } = useMutation({
     mutationFn: () => {
       if (!code) {
         throw new Error("No authorization code provided");
@@ -28,7 +28,7 @@ export const AuthCallbackPage = () => {
   useEffect(() => { if (code) mutate(); }, [code, mutate]);
   useEffect(() => { if (user) navigate("/"); }, [user, navigate]);
 
-  if (isPending) {
+  if (isPending || isAuthLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
