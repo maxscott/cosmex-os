@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getForms } from "@/api/forms";
 import { useAuth } from "@/contexts/useAuth";
 import type { Form } from "@/types/form";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Code } from "lucide-react";
+import { EmbedModal } from "@/components/EmbedModal";
 
 const QuestionTypeBadge = ({ type }: { type: string }) => {
   const colorMap: Record<string, string> = {
@@ -23,7 +25,7 @@ const QuestionTypeBadge = ({ type }: { type: string }) => {
   );
 };
 
-const FormCard = ({ form }: { form: Form }) => {
+const FormCard = ({ form, onEmbedClick }: { form: Form; onEmbedClick: () => void }) => {
   const questions = form.schema.questions || [];
   const contactFields = form.schema.contactFields || {};
   const contactFieldEntries = Object.entries(contactFields);
@@ -39,6 +41,15 @@ const FormCard = ({ form }: { form: Form }) => {
             Version: <span className="font-medium">{form.version}</span>
           </p>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onEmbedClick}
+          className="shrink-0"
+        >
+          <Code className="w-4 h-4" />
+          Copy/Embed
+        </Button>
       </div>
 
       {form.schema.description && (
@@ -99,6 +110,7 @@ const FormCard = ({ form }: { form: Form }) => {
 
 export const CrmFormsPage = () => {
   const { accessToken } = useAuth();
+  const [openModalFormKey, setOpenModalFormKey] = useState<string | null>(null);
 
   const { data: forms, isLoading, error } = useQuery({
     queryKey: ["forms"],
@@ -135,11 +147,14 @@ export const CrmFormsPage = () => {
 
   return (
     <div>
-
       {forms && forms.length > 0 ? (
         <div className="md:w-xl lg:w-2xl md:mx-auto grid grid-cols-1 gap-4">
           {forms.map((form) => (
-            <FormCard key={form.id} form={form} />
+            <FormCard
+              key={form.id}
+              form={form}
+              onEmbedClick={() => setOpenModalFormKey(form.formKey)}
+            />
           ))}
 
           <Button variant="outline" size="lg" className="w-full py-8 text-gray-500 border-dashed border-gray-300">
@@ -150,6 +165,14 @@ export const CrmFormsPage = () => {
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
           <p className="text-gray-600">No forms found.</p>
         </div>
+      )}
+
+      {openModalFormKey && (
+        <EmbedModal
+          isOpen={!!openModalFormKey}
+          onClose={() => setOpenModalFormKey(null)}
+          formKey={openModalFormKey}
+        />
       )}
     </div>
   );
