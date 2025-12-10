@@ -36,7 +36,7 @@ export const EmbedModal = ({ isOpen, onClose, formKey }: EmbedModalProps) => {
       attrs.push(`on-mouse-leave="true"`);
     }
 
-    return `<script async="" src="https://cosmexlink.max-8d7.workers.dev/widget.js" ${attrs.join(" ")}></script>`;
+    return `<script async src="https://cosmexlink.max-8d7.workers.dev/widget.js" ${attrs.join(" ")}></script>`;
   };
 
   const handleCopy = async () => {
@@ -97,32 +97,27 @@ export const EmbedModal = ({ isOpen, onClose, formKey }: EmbedModalProps) => {
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 <label htmlFor="trigger-after-time" className="text-sm font-medium text-gray-700">
-                  Trigger after fixed time
+                  <span>Trigger after </span><span>
+                    <input
+                      type="number"
+                      id="time-seconds"
+                      min="3"
+                      max="60"
+                      value={triggerAfterTime ? timeSeconds : ""}
+                      disabled={!triggerAfterTime}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value, 10);
+                        if (value >= 3 && value <= 60) {
+                          setTimeSeconds(value);
+                        }
+                      }}
+                      className="w-12 px-1 py-1 text-center border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </span>
+                  <span> seconds</span>
+                  <span className="text-xs text-gray-500 ml-2">(between 3-60 seconds)</span>
                 </label>
               </div>
-
-              {triggerAfterTime && (
-                <div className="ml-7">
-                  <label htmlFor="time-seconds" className="block text-sm text-gray-600 mb-1">
-                    Time (seconds)
-                  </label>
-                  <input
-                    type="number"
-                    id="time-seconds"
-                    min="3"
-                    max="60"
-                    value={timeSeconds}
-                    onChange={(e) => {
-                      const value = parseInt(e.target.value, 10);
-                      if (value >= 3 && value <= 60) {
-                        setTimeSeconds(value);
-                      }
-                    }}
-                    className="w-32 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Between 3-60 seconds</p>
-                </div>
-              )}
             </div>
           </div>
 
@@ -132,8 +127,8 @@ export const EmbedModal = ({ isOpen, onClose, formKey }: EmbedModalProps) => {
               Embed Code
             </label>
             <div className="relative">
-              <pre className="bg-gray-50 border border-gray-200 rounded-md p-4 text-sm overflow-x-auto">
-                <code className="text-gray-800">{generateScriptTag()}</code>
+              <pre className="min-h-24 bg-gray-50 border border-gray-200 rounded-md p-4 text-sm overflow-x-auto">
+                <code className="text-gray-800 text-wrap">{generateScriptTag()}</code>
               </pre>
               <Button
                 onClick={handleCopy}
