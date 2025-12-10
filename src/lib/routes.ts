@@ -14,6 +14,7 @@ export const routeToBreadcrumb: Record<string, string> = {
   "/crm/brands/:id": "Brand Details",
   "/crm/forms": "Forms",
   "/crm/forms/new": "Create Form",
+  "/crm/forms/:id/edit": "Edit Form",
   "/messaging": "Messaging",
   "/messaging/inbox": "Inbox",
   "/messaging/inbox/:id": "Thread Details",

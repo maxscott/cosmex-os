@@ -140,6 +140,7 @@ const App = () => {
                     <Route path="/crm/brands/:id" element={<BrandDetailPage />} />
                     <Route path="/crm/brands" element={<BrandsPage />} />
                     <Route path="/crm/forms/new" element={<FormEditorPage />} />
+                    <Route path="/crm/forms/:id/edit" element={<FormEditorPage />} />
                     <Route path="/crm/forms" element={<CrmFormsPage />} />
 
                     {/* Messaging Routes */}

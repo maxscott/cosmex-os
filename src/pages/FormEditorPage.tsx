@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
-import { createForm } from "@/api/forms";
+import { useNavigate, useParams } from "react-router-dom";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createForm, getForm, updateForm } from "@/api/forms";
 import { useAuth } from "@/contexts/useAuth";
 import type { FormSchema, FormQuestion } from "@/types/form";
 import { Button } from "@/components/ui/button";
@@ -89,12 +89,37 @@ const generateQuestionId = () => `q${Date.now()}-${Math.random().toString(36).su
 
 export const FormEditorPage = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const { accessToken } = useAuth();
+  const isEditing = !!id;
   const [schema, setSchema] = useState<FormSchema>(structuredClone(sampleFormData));
   const [supplierId, setSupplierId] = useState<string>("");
 
-  // Get supplier_id from existing forms if available
+  // Load form data if editing
+  const { data: existingForm, isLoading: isLoadingForm } = useQuery({
+    queryKey: ["form", id],
+    queryFn: () => {
+      if (!accessToken || !id) {
+        throw new Error("Missing access token or form ID");
+      }
+      return getForm(accessToken, id);
+    },
+    enabled: isEditing && !!accessToken && !!id,
+  });
+
+  // Update schema when form loads
   useEffect(() => {
+    if (existingForm) {
+      // Initialize form data when editing
+      setSchema(structuredClone(existingForm.schema));
+      setSupplierId(existingForm.supplierId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [existingForm?.id]); // Only re-run when form ID changes
+
+  // Get supplier_id from existing forms if creating new form
+  useEffect(() => {
+    if (isEditing) return; // Skip if editing
     const fetchSupplierId = async () => {
       if (!accessToken) return;
       try {
@@ -114,7 +139,7 @@ export const FormEditorPage = () => {
       }
     };
     fetchSupplierId();
-  }, [accessToken]);
+  }, [accessToken, isEditing]);
 
   const createFormMutation = useMutation({
     mutationFn: (formSchema: FormSchema) => {
@@ -135,8 +160,31 @@ export const FormEditorPage = () => {
     },
   });
 
+  const updateFormMutation = useMutation({
+    mutationFn: (formSchema: FormSchema) => {
+      if (!accessToken) {
+        throw new Error("No access token available");
+      }
+      if (!id) {
+        throw new Error("Form ID is required");
+      }
+      return updateForm(accessToken, id, formSchema);
+    },
+    onSuccess: () => {
+      navigate("/crm/forms");
+    },
+    onError: (error) => {
+      console.error("Failed to update form:", error);
+      alert(`Failed to update form: ${error instanceof Error ? error.message : "Unknown error"}`);
+    },
+  });
+
   const handleSave = () => {
-    createFormMutation.mutate(schema);
+    if (isEditing) {
+      updateFormMutation.mutate(schema);
+    } else {
+      createFormMutation.mutate(schema);
+    }
   };
 
   const updateSchema = (updates: Partial<FormSchema>) => {
@@ -204,18 +252,30 @@ export const FormEditorPage = () => {
     updateSchema({ contactFields });
   };
 
+  if (isEditing && isLoadingForm) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  const isSaving = createFormMutation.isPending || updateFormMutation.isPending;
+
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Create New Form</h1>
+        <h1 className="text-2xl font-bold">
+          {isEditing ? "Edit Form" : "Create New Form"}
+        </h1>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => navigate("/crm/forms")}>
             <X className="w-4 h-4" />
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={createFormMutation.isPending}>
+          <Button onClick={handleSave} disabled={isSaving}>
             <Save className="w-4 h-4" />
-            {createFormMutation.isPending ? "Saving..." : "Save Form"}
+            {isSaving ? "Saving..." : isEditing ? "Update Form" : "Save Form"}
           </Button>
         </div>
       </div>

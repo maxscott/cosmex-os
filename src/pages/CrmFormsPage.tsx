@@ -5,7 +5,7 @@ import { getForms } from "@/api/forms";
 import { useAuth } from "@/contexts/useAuth";
 import type { Form } from "@/types/form";
 import { Button } from "@/components/ui/button";
-import { Plus, Code } from "lucide-react";
+import { Plus, Code, Edit } from "lucide-react";
 import { EmbedModal } from "@/components/EmbedModal";
 
 const QuestionTypeBadge = ({ type }: { type: string }) => {
@@ -26,7 +26,15 @@ const QuestionTypeBadge = ({ type }: { type: string }) => {
   );
 };
 
-const FormCard = ({ form, onEmbedClick }: { form: Form; onEmbedClick: () => void }) => {
+const FormCard = ({
+  form,
+  onEmbedClick,
+  onEditClick,
+}: {
+  form: Form;
+  onEmbedClick: () => void;
+  onEditClick: () => void;
+}) => {
   const questions = form.schema.questions || [];
   const contactFields = form.schema.contactFields || {};
   const contactFieldEntries = Object.entries(contactFields);
@@ -42,15 +50,16 @@ const FormCard = ({ form, onEmbedClick }: { form: Form; onEmbedClick: () => void
             Version: <span className="font-medium">{form.version}</span>
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onEmbedClick}
-          className="shrink-0"
-        >
-          <Code className="w-4 h-4" />
-          Copy/Embed
-        </Button>
+        <div className="flex gap-2 shrink-0">
+          <Button variant="outline" size="sm" onClick={onEditClick}>
+            <Edit className="w-4 h-4" />
+            Edit
+          </Button>
+          <Button variant="outline" size="sm" onClick={onEmbedClick}>
+            <Code className="w-4 h-4" />
+            Copy/Embed
+          </Button>
+        </div>
       </div>
 
       {form.schema.description && (
@@ -147,15 +156,18 @@ export const CrmFormsPage = () => {
     );
   }
 
+  const formSorter = (a: Form, b: Form) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+
   return (
     <div>
       {forms && forms.length > 0 ? (
         <div className="md:w-xl lg:w-2xl md:mx-auto grid grid-cols-1 gap-4">
-          {forms.map((form) => (
+          {forms.sort(formSorter).map((form) => (
             <FormCard
               key={form.id}
               form={form}
               onEmbedClick={() => setOpenModalFormKey(form.formKey)}
+              onEditClick={() => navigate(`/crm/forms/${form.id}/edit`)}
             />
           ))}
 
