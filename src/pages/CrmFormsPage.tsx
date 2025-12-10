@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getForms } from "@/api/forms";
 import { useAuth } from "@/contexts/useAuth";
@@ -109,6 +110,7 @@ const FormCard = ({ form, onEmbedClick }: { form: Form; onEmbedClick: () => void
 };
 
 export const CrmFormsPage = () => {
+  const navigate = useNavigate();
   const { accessToken } = useAuth();
   const [openModalFormKey, setOpenModalFormKey] = useState<string | null>(null);
 
@@ -157,7 +159,12 @@ export const CrmFormsPage = () => {
             />
           ))}
 
-          <Button variant="outline" size="lg" className="w-full py-8 text-gray-500 border-dashed border-gray-300">
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full py-8 text-gray-500 border-dashed border-gray-300"
+            onClick={() => navigate("/crm/forms/new")}
+          >
             <Plus className="w-4 h-4" /> Create New Form
           </Button>
         </div>

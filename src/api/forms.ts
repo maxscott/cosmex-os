@@ -1,5 +1,5 @@
 import * as api from "@/api/methods";
-import type { Form } from "@/types/form";
+import type { Form, FormSchema } from "@/types/form";
 
 export const getForms = async (token: string): Promise<Form[]> => {
   const data = await api.get({ endpoint: "/forms", token });
@@ -9,5 +9,22 @@ export const getForms = async (token: string): Promise<Form[]> => {
   }
 
   return data as Form[];
+};
+
+export const createForm = async (
+  token: string,
+  supplierId: string,
+  schema: FormSchema
+): Promise<Form> => {
+  const data = await api.post({
+    endpoint: "/forms",
+    body: {
+      supplier_id: supplierId,
+      schema: JSON.stringify(schema),
+    },
+    token,
+  });
+
+  return data as Form;
 };
 

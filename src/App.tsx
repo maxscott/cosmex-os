@@ -31,6 +31,7 @@ import { LeadDetailPage } from "./pages/LeadDetailPage";
 import { BrandsPage } from "./pages/BrandsPage";
 import { BrandDetailPage } from "./pages/BrandDetailPage";
 import { CrmFormsPage } from "./pages/CrmFormsPage";
+import { FormEditorPage } from "./pages/FormEditorPage";
 import { InboxPage } from "./pages/InboxPage";
 import { ThreadDetailPage } from "./pages/ThreadDetailPage";
 import { ResponseTemplatesPage } from "./pages/ResponseTemplatesPage";
@@ -138,6 +139,7 @@ const App = () => {
                     <Route path="/crm/leads" element={<LeadsPage />} />
                     <Route path="/crm/brands/:id" element={<BrandDetailPage />} />
                     <Route path="/crm/brands" element={<BrandsPage />} />
+                    <Route path="/crm/forms/new" element={<FormEditorPage />} />
                     <Route path="/crm/forms" element={<CrmFormsPage />} />
 
                     {/* Messaging Routes */}
