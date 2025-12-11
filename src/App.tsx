@@ -41,6 +41,7 @@ import { ReceivablesPage } from "./pages/ReceivablesPage";
 import { QAPage } from "./pages/QAPage";
 import { AuthCallbackPage } from "./pages/AuthCallbackPage";
 import { AuthProvider } from "./contexts/AuthProvider";
+import { OrganizationProvider } from "./contexts/OrganizationProvider";
 import { LoginPage } from "./pages/LoginPage";
 import { ProfilePage } from "./pages/ProfilePage";
 
@@ -103,65 +104,67 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
-          <div className="flex h-screen bg-gray-50">
-            <Sidebar
-              isOpen={sidebarOpen}
-              onClose={() => setSidebarOpen(false)}
-              navItems={navItems}
-            />
+        <OrganizationProvider>
+          <BrowserRouter>
+            <div className="flex h-screen bg-gray-50">
+              <Sidebar
+                isOpen={sidebarOpen}
+                onClose={() => setSidebarOpen(false)}
+                navItems={navItems}
+              />
 
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <Header onMenuClick={() => setSidebarOpen(true)} />
+              {/* Main Content */}
+              <div className="flex-1 flex flex-col overflow-hidden">
+                <Header onMenuClick={() => setSidebarOpen(true)} />
 
-              {/* Content Area */}
-              <main className="flex-1 overflow-auto p-4 lg:p-6">
-                <Routes>
-                  {/* Public Routes */}
-                  <Route path="/auth/callback" element={<AuthCallbackPage />} />
-                  <Route path="/auth/login" element={<LoginPage />} />
+                {/* Content Area */}
+                <main className="flex-1 overflow-auto p-4 lg:p-6">
+                  <Routes>
+                    {/* Public Routes */}
+                    <Route path="/auth/callback" element={<AuthCallbackPage />} />
+                    <Route path="/auth/login" element={<LoginPage />} />
 
-                  {/* Protected Routes */}
-                  <Route element={<ProtectedRoute />}>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/home" element={<Navigate to="/" replace />} />
+                    {/* Protected Routes */}
+                    <Route element={<ProtectedRoute />}>
+                      <Route path="/" element={<HomePage />} />
+                      <Route path="/home" element={<Navigate to="/" replace />} />
 
-                    {/* Products Routes */}
-                    <Route path="/products/proposals" element={<ProposalsPage />} />
-                    <Route path="/products/changes" element={<ChangesPage />} />
-                    <Route path="/products/purchase-orders" element={<PurchaseOrdersPage />} />
-                    <Route path="/products/:id" element={<ProductDetailPage />} />
-                    <Route path="/products" element={<ProductsPage />} />
+                      {/* Products Routes */}
+                      <Route path="/products/proposals" element={<ProposalsPage />} />
+                      <Route path="/products/changes" element={<ChangesPage />} />
+                      <Route path="/products/purchase-orders" element={<PurchaseOrdersPage />} />
+                      <Route path="/products/:id" element={<ProductDetailPage />} />
+                      <Route path="/products" element={<ProductsPage />} />
 
-                    {/* CRM Routes */}
-                    <Route path="/crm/leads/:id" element={<LeadDetailPage />} />
-                    <Route path="/crm/leads" element={<LeadsPage />} />
-                    <Route path="/crm/brands/:id" element={<BrandDetailPage />} />
-                    <Route path="/crm/brands" element={<BrandsPage />} />
-                    <Route path="/crm/forms/new" element={<FormEditorPage />} />
-                    <Route path="/crm/forms/:id/edit" element={<FormEditorPage />} />
-                    <Route path="/crm/forms" element={<CrmFormsPage />} />
+                      {/* CRM Routes */}
+                      <Route path="/crm/leads/:id" element={<LeadDetailPage />} />
+                      <Route path="/crm/leads" element={<LeadsPage />} />
+                      <Route path="/crm/brands/:id" element={<BrandDetailPage />} />
+                      <Route path="/crm/brands" element={<BrandsPage />} />
+                      <Route path="/crm/forms/new" element={<FormEditorPage />} />
+                      <Route path="/crm/forms/:id/edit" element={<FormEditorPage />} />
+                      <Route path="/crm/forms" element={<CrmFormsPage />} />
 
-                    {/* Messaging Routes */}
-                    <Route path="/messaging/inbox/:id" element={<ThreadDetailPage />} />
-                    <Route path="/messaging/inbox" element={<InboxPage />} />
-                    <Route path="/messaging/response-templates" element={<ResponseTemplatesPage />} />
+                      {/* Messaging Routes */}
+                      <Route path="/messaging/inbox/:id" element={<ThreadDetailPage />} />
+                      <Route path="/messaging/inbox" element={<InboxPage />} />
+                      <Route path="/messaging/response-templates" element={<ResponseTemplatesPage />} />
 
-                    {/* Documents Routes */}
-                    <Route path="/documents/contracts" element={<ContractsPage />} />
-                    <Route path="/documents/invoices" element={<InvoicesPage />} />
-                    <Route path="/documents/receivables" element={<ReceivablesPage />} />
-                    <Route path="/documents/qa" element={<QAPage />} />
+                      {/* Documents Routes */}
+                      <Route path="/documents/contracts" element={<ContractsPage />} />
+                      <Route path="/documents/invoices" element={<InvoicesPage />} />
+                      <Route path="/documents/receivables" element={<ReceivablesPage />} />
+                      <Route path="/documents/qa" element={<QAPage />} />
 
-                    {/* Profile Route */}
-                    <Route path="/profile" element={<ProfilePage />} />
-                  </Route>
-                </Routes>
-              </main>
+                      {/* Profile Route */}
+                      <Route path="/profile" element={<ProfilePage />} />
+                    </Route>
+                  </Routes>
+                </main>
+              </div>
             </div>
-          </div>
-        </BrowserRouter>
+          </BrowserRouter>
+        </OrganizationProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

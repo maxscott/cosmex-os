@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import type { ReactNode } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import { getMe, refreshTokens } from "@/api/auth";
@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const isFetchingRef = useRef(false);
 
-  const getCurrentUserHandler = async (accessToken: string) => {
+  const getCurrentUserHandler = useCallback(async (accessToken: string) => {
     if (isFetchingRef.current) {
       return; // Already fetching, skip
     }
@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } finally {
       isFetchingRef.current = false;
     }
-  }
+  }, []);
 
   const refreshTokensHandler = async () => {
     const newAccessToken = await refreshTokens();
@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     };
     initializeAuth();
-  }, [accessToken, user]);
+  }, [accessToken, user, getCurrentUserHandler]);
 
   const logout = async () => {
     await sleep(1000);
