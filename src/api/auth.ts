@@ -1,4 +1,4 @@
-import { type ApiError } from "@/api/methods";
+import { API_BASE_URL, type ApiError } from "@/api/methods";
 import * as api from "@/api/methods";
 import type { UserData } from "@/types/user";
 
@@ -27,12 +27,26 @@ export const getAccessToken = async (code: string): Promise<string> => {
 };
 
 export const refreshTokens = async (): Promise<string> => {
-  const data = await api.post({ endpoint: "/auth/refresh" });
+  const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw { message: "Failed to refresh tokens" } as ApiError;
+  }
+
+  const data = await response.json();
 
   if (!guardTokenResponse(data)) {
     console.warn(data);
     throw { message: "Invalid response: missing access token on refresh" } as ApiError;
   }
+
+  localStorage.setItem("accessToken", data.accessToken);
 
   return data.accessToken;
 };

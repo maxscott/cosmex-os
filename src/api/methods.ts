@@ -1,3 +1,4 @@
+import { refreshTokens } from "./auth";
 
 export interface ApiError {
   message: string;
@@ -56,13 +57,27 @@ export const del = async ({ endpoint, token }: { endpoint: string; token?: strin
  * @param token - The token to use for authentication
  * @returns Promise resolving to the response or throwing an error
  */
-export const baseHttpCall = async ({ method, endpoint, body, token }: { method: string; endpoint: string; body?: unknown; token?: string; }): Promise<unknown> => {
+export const baseHttpCall = async ({
+  method,
+  endpoint,
+  body,
+  token,
+  retried = false,
+}: {
+  method: string;
+  endpoint: string;
+  body?: unknown;
+  token?: string;
+  retried?: boolean;
+}): Promise<unknown> => {
   try {
     const headers = new Headers();
     headers.set("Content-Type", "application/json");
     const supplierId = localStorage.getItem("coid");
     headers.set("X-Organization-Id", supplierId ?? "");
-    if (token) headers.set("Authorization", `Bearer ${token}`);
+    // if (token) headers.set("Authorization", `Bearer ${token}`);
+    const accessToken = localStorage.getItem("accessToken");
+    if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method,
@@ -72,6 +87,13 @@ export const baseHttpCall = async ({ method, endpoint, body, token }: { method: 
     });
 
     if (!response.ok) {
+      if (!retried && response.status === 401) {
+        const errorBody = await response.json();
+        if (errorBody?.error?.toLowerCase().includes("expired")) {
+          const newAccessToken = await refreshTokens();
+          return baseHttpCall({ method, endpoint, body, token: newAccessToken, retried: true });
+        }
+      }
       const error: ApiError = {
         message: `Failed to ${method} data: ${response.statusText}`,
         status: response.status,
