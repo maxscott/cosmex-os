@@ -60,6 +60,8 @@ export const baseHttpCall = async ({ method, endpoint, body, token }: { method: 
   try {
     const headers = new Headers();
     headers.set("Content-Type", "application/json");
+    const supplierId = localStorage.getItem("coid");
+    headers.set("X-Organization-Id", supplierId ?? "");
     if (token) headers.set("Authorization", `Bearer ${token}`);
 
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {

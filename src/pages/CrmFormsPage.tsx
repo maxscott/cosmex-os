@@ -132,6 +132,7 @@ export const CrmFormsPage = () => {
       return getForms(accessToken);
     },
     enabled: !!accessToken,
+    retry: false,
   });
 
   if (isLoading) {
