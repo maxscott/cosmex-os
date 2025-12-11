@@ -11,7 +11,7 @@ interface OrganizationProviderProps {
 }
 
 export const OrganizationProvider = ({ children }: OrganizationProviderProps) => {
-  const { accessToken, user } = useAuth();
+  const { user } = useAuth();
   const [orgId, setOrgId] = useState(() => {
     return localStorage.getItem(CURRENT_ORG_KEY) ?? null;
   });
@@ -19,12 +19,12 @@ export const OrganizationProvider = ({ children }: OrganizationProviderProps) =>
   const { data: organizations, isLoading, error } = useQuery({
     queryKey: ["organizations"],
     queryFn: () => {
-      if (!accessToken || !user) {
+      if (!user) {
         return null;
       }
-      return getOrganizations(accessToken);
+      return getOrganizations();
     },
-    enabled: !!accessToken && !!user, // Only fetch if we have both an access token and a user
+    enabled: !!user, // Only fetch if we have both an access token and a user
   });
 
   // real current org depends on both query + stored id

@@ -61,8 +61,8 @@ export const getAuthenticationUrl = async (): Promise<string> => {
   return data.url;
 };
 
-export const getMe = async (token: string): Promise<UserData> => {
-  const data = await api.get({ endpoint: "/auth/me", token });
+export const getMe = async (): Promise<UserData> => {
+  const data = await api.get({ endpoint: "/auth/me" });
 
   if (!data || typeof data !== "object" ||
     !("id" in data) || typeof data.id !== "string" ||

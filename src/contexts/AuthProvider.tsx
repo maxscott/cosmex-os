@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { ReactNode } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
-import { getMe, refreshTokens } from "@/api/auth";
+import { getMe } from "@/api/auth";
 import { sleep } from "@/lib/utils";
 import type { UserData } from "@/types/user";
 
@@ -10,19 +10,18 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [user, setUser] = useState<UserData | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [isLoading, setIsLoading] = useState(true);
   const isFetchingRef = useRef(false);
 
-  const getCurrentUserHandler = useCallback(async (accessToken: string) => {
+  const getCurrentUserHandler = useCallback(async () => {
     if (isFetchingRef.current) {
       return; // Already fetching, skip
     }
     isFetchingRef.current = true;
     try {
-      const userData = await getMe(accessToken);
+      const userData = await getMe();
       setUser(userData);
       setIsLoading(false);
     } catch (error) {
@@ -32,13 +31,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, []);
 
-  const refreshTokensHandler = async () => {
-    const newAccessToken = await refreshTokens();
-    setAccessToken(newAccessToken);
-    // Don't call getCurrentUserHandler here - let the useEffect handle it when accessToken changes
-    return newAccessToken;
-  }
-
   const handleError = (error: unknown) => {
     setError(error);
     setIsLoading(false);
@@ -46,54 +38,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(() => {
     const initializeAuth = async () => {
-      if (accessToken && user) {
+      if (user || isFetchingRef.current) {
         return;
       }
-
-      // Prevent duplicate calls
-      if (isFetchingRef.current) {
-        return;
-      }
-
-      let triedRefresh = false;
 
       try {
-        if (accessToken) {
-          await getCurrentUserHandler(accessToken);
-          return;
-        }
-        if (!accessToken) {
-          triedRefresh = true;
-          await refreshTokensHandler();
-          // accessToken will be set, which will trigger this effect again to call getCurrentUserHandler
-          return;
-        }
-      } catch (error1) {
-        handleError(error1);
-        try {
-          if (triedRefresh) {
-            handleError(error1);
-            return;
-          } else {
-            if (isFetchingRef.current) {
-              return;
-            }
-            await refreshTokensHandler();
-            // accessToken will be set, which will trigger this effect again to call getCurrentUserHandler
-            return;
-          }
-        } catch (error) {
-          handleError(error);
-          return;
-        }
+        await getCurrentUserHandler(); // empty string is a valid token
+        return;
+      } catch (error) {
+        handleError(error);
+        return;
       }
     };
     initializeAuth();
-  }, [accessToken, user, getCurrentUserHandler]);
+  }, [user, getCurrentUserHandler]);
+
+  const setAccessToken = useCallback((accessToken: string) => {
+    localStorage.setItem("accessToken", accessToken);
+  }, []);
 
   const logout = async () => {
     await sleep(1000);
-    setAccessToken(null);
+    localStorage.removeItem("accessToken");
     setUser(null);
     setError(null);
     setIsLoading(false);
@@ -102,7 +68,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   return (
     <AuthContext.Provider
       value={{
-        accessToken,
         setAccessToken,
         logout,
         user,

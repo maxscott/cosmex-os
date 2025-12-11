@@ -14,8 +14,8 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
  * @param token - The token to use for authentication
  * @returns Promise resolving to the response or throwing an error
  */
-export const post = async ({ endpoint, body, token }: { endpoint: string; body?: unknown; token?: string; }): Promise<unknown> => {
-  return baseHttpCall({ method: "POST", endpoint, body, token });
+export const post = async ({ endpoint, body }: { endpoint: string; body?: unknown; }): Promise<unknown> => {
+  return baseHttpCall({ method: "POST", endpoint, body });
 };
 
 /**
@@ -24,8 +24,8 @@ export const post = async ({ endpoint, body, token }: { endpoint: string; body?:
  * @param token - The token to use for authentication
  * @returns Promise resolving to the response or throwing an error
  */
-export const get = async ({ endpoint, token }: { endpoint: string; token?: string; }): Promise<unknown> => {
-  return baseHttpCall({ method: "GET", endpoint, token });
+export const get = async ({ endpoint }: { endpoint: string; }): Promise<unknown> => {
+  return baseHttpCall({ method: "GET", endpoint });
 };
 
 /**
@@ -35,8 +35,8 @@ export const get = async ({ endpoint, token }: { endpoint: string; token?: strin
  * @param token - The token to use for authentication
  * @returns Promise resolving to the response or throwing an error
  */
-export const put = async ({ endpoint, body, token }: { endpoint: string; body?: unknown; token?: string; }): Promise<unknown> => {
-  return baseHttpCall({ method: "PUT", endpoint, body, token });
+export const put = async ({ endpoint, body }: { endpoint: string; body?: unknown; }): Promise<unknown> => {
+  return baseHttpCall({ method: "PUT", endpoint, body });
 };
 
 /**
@@ -45,8 +45,8 @@ export const put = async ({ endpoint, body, token }: { endpoint: string; body?: 
  * @param token - The token to use for authentication
  * @returns Promise resolving to the response or throwing an error
  */
-export const del = async ({ endpoint, token }: { endpoint: string; token?: string; }): Promise<unknown> => {
-  return baseHttpCall({ method: "DELETE", endpoint, token });
+export const del = async ({ endpoint }: { endpoint: string; }): Promise<unknown> => {
+  return baseHttpCall({ method: "DELETE", endpoint });
 };
 
 /**
@@ -61,13 +61,11 @@ export const baseHttpCall = async ({
   method,
   endpoint,
   body,
-  token,
   retried = false,
 }: {
   method: string;
   endpoint: string;
   body?: unknown;
-  token?: string;
   retried?: boolean;
 }): Promise<unknown> => {
   try {
@@ -90,8 +88,8 @@ export const baseHttpCall = async ({
       if (!retried && response.status === 401) {
         const errorBody = await response.json();
         if (errorBody?.error?.toLowerCase().includes("expired")) {
-          const newAccessToken = await refreshTokens();
-          return baseHttpCall({ method, endpoint, body, token: newAccessToken, retried: true });
+          await refreshTokens();
+          return baseHttpCall({ method, endpoint, body, retried: true });
         }
       }
       const error: ApiError = {

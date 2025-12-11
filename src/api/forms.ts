@@ -1,8 +1,8 @@
 import * as api from "@/api/methods";
 import type { Form, FormSchema } from "@/types/form";
 
-export const getForms = async (token: string): Promise<Form[]> => {
-  const data = await api.get({ endpoint: "/forms", token });
+export const getForms = async (): Promise<Form[]> => {
+  const data = await api.get({ endpoint: "/forms" });
 
   if (!Array.isArray(data)) {
     throw new Error("Invalid response: expected array of forms");
@@ -11,8 +11,8 @@ export const getForms = async (token: string): Promise<Form[]> => {
   return data as Form[];
 };
 
-export const getForm = async (token: string, formId: string): Promise<Form> => {
-  const data = await api.get({ endpoint: `/forms/${formId}`, token });
+export const getForm = async (formId: string): Promise<Form> => {
+  const data = await api.get({ endpoint: `/forms/${formId}` });
 
   if (!data || typeof data !== "object") {
     throw new Error("Invalid response: expected form object");
@@ -22,7 +22,6 @@ export const getForm = async (token: string, formId: string): Promise<Form> => {
 };
 
 export const createForm = async (
-  token: string,
   supplierId: string,
   schema: FormSchema
 ): Promise<Form> => {
@@ -32,14 +31,12 @@ export const createForm = async (
       supplier_id: supplierId,
       schema: JSON.stringify(schema),
     },
-    token,
   });
 
   return data as Form;
 };
 
 export const updateForm = async (
-  token: string,
   formId: string,
   schema: FormSchema
 ): Promise<Form> => {
@@ -48,7 +45,6 @@ export const updateForm = async (
     body: {
       schema: JSON.stringify(schema),
     },
-    token,
   });
 
   return data as Form;

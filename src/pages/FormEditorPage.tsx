@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createForm, getForm, updateForm } from "@/api/forms";
-import { useAuth } from "@/contexts/useAuth";
 import type { FormSchema, FormQuestion } from "@/types/form";
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Save, X } from "lucide-react";
+import { useOrganizations } from "@/contexts/useOrganizations";
 
 // Sample form data from fixtures
 const sampleFormData: FormSchema = {
@@ -90,21 +90,20 @@ const generateQuestionId = () => `q${Date.now()}-${Math.random().toString(36).su
 export const FormEditorPage = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { accessToken } = useAuth();
   const isEditing = !!id;
   const [schema, setSchema] = useState<FormSchema>(structuredClone(sampleFormData));
-  const [supplierId, setSupplierId] = useState<string>("");
+  const { currentOrganization } = useOrganizations();
 
   // Load form data if editing
   const { data: existingForm, isLoading: isLoadingForm } = useQuery({
     queryKey: ["form", id],
     queryFn: () => {
-      if (!accessToken || !id) {
+      if (!id) {
         throw new Error("Missing access token or form ID");
       }
-      return getForm(accessToken, id);
+      return getForm(id);
     },
-    enabled: isEditing && !!accessToken && !!id,
+    enabled: isEditing && !!id,
   });
 
   // Update schema when form loads
@@ -112,44 +111,16 @@ export const FormEditorPage = () => {
     if (existingForm) {
       // Initialize form data when editing
       setSchema(structuredClone(existingForm.schema));
-      setSupplierId(existingForm.supplierId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [existingForm?.id]); // Only re-run when form ID changes
 
-  // Get supplier_id from existing forms if creating new form
-  useEffect(() => {
-    if (isEditing) return; // Skip if editing
-    const fetchSupplierId = async () => {
-      if (!accessToken) return;
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || ""}/forms`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        if (response.ok) {
-          const forms = await response.json();
-          if (forms && forms.length > 0) {
-            setSupplierId(forms[0].supplierId);
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch supplier ID:", error);
-      }
-    };
-    fetchSupplierId();
-  }, [accessToken, isEditing]);
-
   const createFormMutation = useMutation({
     mutationFn: (formSchema: FormSchema) => {
-      if (!accessToken) {
-        throw new Error("No access token available");
+      if (!currentOrganization) {
+        throw new Error("Current organization is required");
       }
-      if (!supplierId) {
-        throw new Error("Supplier ID is required");
-      }
-      return createForm(accessToken, supplierId, formSchema);
+      return createForm(currentOrganization.id, formSchema);
     },
     onSuccess: () => {
       navigate("/crm/forms");
@@ -162,13 +133,13 @@ export const FormEditorPage = () => {
 
   const updateFormMutation = useMutation({
     mutationFn: (formSchema: FormSchema) => {
-      if (!accessToken) {
+      if (!currentOrganization) {
         throw new Error("No access token available");
       }
       if (!id) {
         throw new Error("Form ID is required");
       }
-      return updateForm(accessToken, id, formSchema);
+      return updateForm(id, formSchema);
     },
     onSuccess: () => {
       navigate("/crm/forms");

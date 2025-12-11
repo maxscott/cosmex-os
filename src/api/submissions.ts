@@ -9,7 +9,6 @@ interface SubmissionsResponse {
 }
 
 export const getSubmissions = async (
-  token: string,
   page: number = 1,
   perPage: number = 50
 ): Promise<SubmissionsResponse> => {
@@ -17,7 +16,7 @@ export const getSubmissions = async (
     page: String(page),
     per_page: String(perPage),
   });
-  const data = await api.get({ endpoint: `/submissions?${params.toString()}`, token });
+  const data = await api.get({ endpoint: `/submissions?${params.toString()}` });
 
   if (
     typeof data !== "object" || data === null ||

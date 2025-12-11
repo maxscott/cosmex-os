@@ -35,8 +35,8 @@ const guardOrganizationsResponse = (data: unknown): data is { organizations: Mem
   return data.organizations.every(isValidMemberable);
 };
 
-export const getOrganizations = async (token: string): Promise<Memberable[]> => {
-  const data = await api.get({ endpoint: "/organizations", token });
+export const getOrganizations = async (): Promise<Memberable[]> => {
+  const data = await api.get({ endpoint: "/organizations" });
 
   if (!guardOrganizationsResponse(data)) {
     console.warn(data);

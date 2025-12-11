@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getSubmissions } from "@/api/submissions";
 import { getForms } from "@/api/forms";
-import { useAuth } from "@/contexts/useAuth";
 import type { Submission } from "@/types/submission";
 import type { Form } from "@/types/form";
 import { useMemo, useState } from "react";
@@ -87,30 +86,21 @@ const SubmissionTable = ({ form, submissions }: GroupedSubmission) => {
 };
 
 export const LeadsPage = () => {
-  const { accessToken } = useAuth();
   const [page, setPage] = useState(1);
   const perPage = 25;
 
   const { data: submissionsResponse, isLoading: isLoadingSubmissions } = useQuery({
     queryKey: ["submissions", page],
     queryFn: () => {
-      if (!accessToken) {
-        throw new Error("No access token available");
-      }
-      return getSubmissions(accessToken, page, perPage);
+      return getSubmissions(page, perPage);
     },
-    enabled: !!accessToken,
   });
 
   const { data: forms, isLoading: isLoadingForms } = useQuery({
     queryKey: ["forms"],
     queryFn: () => {
-      if (!accessToken) {
-        throw new Error("No access token available");
-      }
-      return getForms(accessToken);
+      return getForms();
     },
-    enabled: !!accessToken,
   });
 
   // Group submissions by form_key

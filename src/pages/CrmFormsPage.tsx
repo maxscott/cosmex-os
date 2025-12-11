@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getForms } from "@/api/forms";
-import { useAuth } from "@/contexts/useAuth";
 import type { Form } from "@/types/form";
 import { Button } from "@/components/ui/button";
 import { Plus, Code, Edit } from "lucide-react";
@@ -120,18 +119,11 @@ const FormCard = ({
 
 export const CrmFormsPage = () => {
   const navigate = useNavigate();
-  const { accessToken } = useAuth();
   const [openModalFormKey, setOpenModalFormKey] = useState<string | null>(null);
 
   const { data: forms, isLoading, error } = useQuery({
     queryKey: ["forms"],
-    queryFn: () => {
-      if (!accessToken) {
-        throw new Error("No access token available");
-      }
-      return getForms(accessToken);
-    },
-    enabled: !!accessToken,
+    queryFn: () => getForms(),
     retry: false,
   });
 
