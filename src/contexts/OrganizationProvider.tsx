@@ -1,8 +1,8 @@
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { OrganizationContext } from "@/contexts/OrganizationContext";
 import { getOrganizations } from "@/api/organizations";
-import { useAuth } from "@/contexts/useAuth";
+import type { Memberable } from "@/types/organization";
 
 const CURRENT_ORG_KEY = 'coid';
 
@@ -11,28 +11,31 @@ interface OrganizationProviderProps {
 }
 
 export const OrganizationProvider = ({ children }: OrganizationProviderProps) => {
-  const { user } = useAuth();
-  const [orgId, setOrgId] = useState(() => {
-    return localStorage.getItem(CURRENT_ORG_KEY) ?? null;
-  });
+  const [currentOrganization, setCurrentOrganizationObject] = useState<Memberable | null>(null);
 
   const { data: organizations, isLoading, error } = useQuery({
     queryKey: ["organizations"],
-    queryFn: () => {
-      if (!user) {
+    queryFn: async () => {
+      const organizations = await getOrganizations();
+
+      if (!organizations || !organizations[0]) {
         return null;
       }
-      return getOrganizations();
-    },
-    enabled: !!user, // Only fetch if we have both an access token and a user
-  });
 
-  // real current org depends on both query + stored id
-  const currentOrganization = useMemo(() => {
-    if (!organizations?.length) return null;
-    const byStorage = orgId ? organizations.find(o => o.id === orgId) : null;
-    return byStorage ?? organizations[0];
-  }, [organizations, orgId]);
+      const orgId = localStorage.getItem(CURRENT_ORG_KEY);
+      const currentOrganization = orgId ? organizations.find(o => o.id === orgId) : organizations[0];
+
+      if (currentOrganization) {
+        setCurrentOrganizationObject(currentOrganization);
+        localStorage.setItem(CURRENT_ORG_KEY, currentOrganization.id);
+      } else {
+        setCurrentOrganizationObject(null);
+        localStorage.removeItem(CURRENT_ORG_KEY);
+      }
+
+      return organizations;
+    }
+  });
 
   // set current organization in localStorage
   const setCurrentOrganization = useCallback((orgId: string | null) => {
@@ -41,8 +44,8 @@ export const OrganizationProvider = ({ children }: OrganizationProviderProps) =>
     } else {
       localStorage.removeItem(CURRENT_ORG_KEY);
     }
-    setOrgId(orgId);
-  }, []);
+    setCurrentOrganizationObject(orgId ? organizations?.find(o => o.id === orgId) ?? null : null);
+  }, [organizations]);
 
   return (
     <OrganizationContext.Provider
