@@ -7,10 +7,10 @@ import { useAuth } from "@/contexts/useAuth";
 export const AuthCallbackPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { setAccessToken, error: authError, isLoading: isAuthLoading } = useAuth();
+  const { accessToken, setAccessToken, error: authError, isLoading: isAuthLoading } = useAuth();
   const code = searchParams.get("code");
 
-  const { isPending, error, mutate, data: accessToken } = useMutation({
+  const { isPending, error, mutate } = useMutation({
     mutationFn: () => {
       if (!code) {
         throw new Error("No authorization code provided");
