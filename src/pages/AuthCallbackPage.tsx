@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { getAccessToken } from "@/api/auth";
 import { useAuth } from "@/contexts/useAuth";
@@ -7,10 +7,10 @@ import { useAuth } from "@/contexts/useAuth";
 export const AuthCallbackPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { setAccessToken, user, error: authError, isLoading: isAuthLoading } = useAuth();
+  const { setAccessToken, error: authError, isLoading: isAuthLoading } = useAuth();
   const code = searchParams.get("code");
 
-  const { isPending, isError, mutate } = useMutation({
+  const { isPending, error, mutate, data: accessToken } = useMutation({
     mutationFn: () => {
       if (!code) {
         throw new Error("No authorization code provided");
@@ -26,7 +26,7 @@ export const AuthCallbackPage = () => {
   });
 
   useEffect(() => { if (code) mutate(); }, [code, mutate]);
-  useEffect(() => { if (user) navigate("/"); }, [user, navigate]);
+  useEffect(() => { if (accessToken) navigate("/"); }, [accessToken, navigate]);
 
   if (isPending || isAuthLoading) {
     return (
@@ -39,17 +39,22 @@ export const AuthCallbackPage = () => {
     );
   }
 
-  if (isError || authError) {
+  if (error || authError) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="text-red-600 text-xl mb-4">Authentication Failed</div>
-          <a
-            href="/auth/login"
+          <Link
+            to="/auth/login"
+            replace
             className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 inline-block"
           >
             Return to Login
-          </a>
+          </Link>
+        </div>
+        <div className="text-center">
+          <p className="text-gray-600">error: {JSON.stringify(error)}</p>
+          <p className="text-gray-600">authError: {JSON.stringify(authError)}</p>
         </div>
       </div>
     );

@@ -20,7 +20,7 @@ export const ProtectedRoute = () => {
     );
   }
 
-  if (error || !user) {
+  if (error) {
     return <Navigate to="/auth/login" replace />;
   }
 

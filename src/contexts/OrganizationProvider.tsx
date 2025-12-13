@@ -34,7 +34,9 @@ export const OrganizationProvider = ({ children }: OrganizationProviderProps) =>
       }
 
       return organizations;
-    }
+    },
+    enabled: !!localStorage.getItem("accessToken"),
+    retry: false,
   });
 
   // set current organization in localStorage
